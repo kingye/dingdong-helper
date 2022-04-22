@@ -1,6 +1,9 @@
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * 用户信息
@@ -8,14 +11,17 @@ import java.util.Map;
  */
 public class UserConfig {
 
-    //城市
-    public static final String cityId = "0101";//默认上海
+    // 城市
+    public static final String cityId = "0101";// 默认上海
 
-    //站点id
-    public static final String stationId = "";
+    // 站点id
+    public static  String stationId;
 
-    //收货地址id
-    public static final String addressId = "";
+    // 收货地址id
+    public static  String addressId;
+
+    private static final Map<String, String> headers = new HashMap<>();
+    private static final Map<String, String> body = new HashMap<>();
 
     /**
      * 确认收货地址id和站点id
@@ -25,11 +31,11 @@ public class UserConfig {
         Api.checkUserConfig();
     }
 
-    /**
-     * 抓包后参考项目中的image/headers.jpeg 把信息一行一行copy到下面 没有的key不需要复制
-     */
-    public static Map<String, String> getHeaders() {
-        Map<String, String> headers = new HashMap<>();
+    public static void load(String propName) throws IOException {
+        Properties appProps = new Properties();
+        appProps.load(new FileInputStream(propName));
+        UserConfig.stationId = appProps.getProperty("stationId");
+        UserConfig.addressId = appProps.getProperty("addressId");
         headers.put("ddmc-city-number", cityId);
         headers.put("ddmc-time", String.valueOf(new Date().getTime() / 1000));
         headers.put("ddmc-build-version", "2.83.0");
@@ -42,23 +48,15 @@ public class UserConfig {
         headers.put("accept-encoding", "gzip,compress,br,deflate");
         headers.put("referer", "https://servicewechat.com/wx1e113254eda17715/425/page-frame.html");
 
-        // ------------  填入以下6项 上面不要动 ------------
-        headers.put("ddmc-device-id", "");
-        headers.put("cookie", "");
-        headers.put("ddmc-longitude", "");
-        headers.put("ddmc-latitude", "");
-        headers.put("ddmc-uid", "");
-        headers.put("user-agent", "");
-        return headers;
-    }
+        // ------------ 填入以下6项 上面不要动 ------------
+        headers.put("ddmc-device-id", appProps.getProperty("ddmc-device-id")); //"");
+        headers.put("cookie", appProps.getProperty("cookie")); //"");
+        headers.put("ddmc-longitude", appProps.getProperty("ddmc-longitude")); //"");
+        headers.put("ddmc-latitude", appProps.getProperty("ddmc-latitude"));// "");
+        headers.put("ddmc-uid", appProps.getProperty("ddmc-uid"));// "");
+        headers.put("user-agent",
+                appProps.getProperty("user-agent")); //"");
 
-    /**
-     * 抓包后参考项目中的image/body.jpeg 把信息一行一行copy到下面 没有的key不需要复制
-     * <p>
-     * 这里不能加泛型 有些接口是params  泛型必须要求<String,String> 有些是form表单 泛型要求<String,Object> 无法统一
-     */
-    public static Map getBody(Map<String, String> headers) {
-        Map body = new HashMap<>();
         body.put("uid", headers.get("ddmc-uid"));
         body.put("longitude", headers.get("ddmc-longitude"));
         body.put("latitude ", headers.get("ddmc-latitude"));
@@ -74,9 +72,25 @@ public class UserConfig {
         body.put("time", headers.get("ddmc-time"));
         body.put("openid", headers.get("ddmc-device-id"));
 
-        // ------------  填入这2项上面不要动 ------------
-        body.put("s_id", "");
-        body.put("device_token", "");
-        return body;
+        // ------------ 填入这2项上面不要动 ------------
+        body.put("s_id", appProps.getProperty("s_id"));//"");
+        body.put("device_token", appProps.getProperty("device_token"));// "");
+
+    }
+
+    /**
+     * 抓包后参考项目中的image/headers.jpeg 把信息一行一行copy到下面 没有的key不需要复制
+     */
+    public static Map<String, String> getHeaders() {
+        return new HashMap<>(headers);
+    }
+
+    /**
+     * 抓包后参考项目中的image/body.jpeg 把信息一行一行copy到下面 没有的key不需要复制
+     * <p>
+     * 这里不能加泛型 有些接口是params 泛型必须要求<String,String> 有些是form表单 泛型要求<String,Object> 无法统一
+     */
+    public static Map getBody() {
+        return new HashMap<>(body);
     }
 }

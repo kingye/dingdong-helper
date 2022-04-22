@@ -144,7 +144,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createGet("https://sunquan.api.ddxq.mobi/api/v1/user/address/");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            httpRequest.formStr(sign(UserConfig.getBody(headers)));
+            httpRequest.formStr(sign(UserConfig.getBody()));
 
             String body = httpRequest.execute().body();
             JSONObject object = JSONUtil.parseObj(body);
@@ -202,7 +202,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createGet("https://maicai.api.ddxq.mobi/cart/allCheck");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            Map<String, String> request = UserConfig.getBody(headers);
+            Map<String, String> request = UserConfig.getBody();
             request.put("is_check", "1");
             httpRequest.formStr(sign(request));
 
@@ -229,7 +229,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createGet("https://maicai.api.ddxq.mobi/cart/index");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            Map<String, String> request = UserConfig.getBody(headers);
+            Map<String, String> request = UserConfig.getBody();
             request.put("is_load", "1");
             request.put("ab_config", "{\"key_onion\":\"D\",\"key_cart_discount_price\":\"C\"}");
 
@@ -309,7 +309,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createPost("https://maicai.api.ddxq.mobi/order/getMultiReserveTime");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            Map<String, Object> request = UserConfig.getBody(headers);
+            Map<String, Object> request = UserConfig.getBody();
             request.put("address_id", addressId);
             request.put("products", "[" + JSONUtil.toJsonStr(cartMap.get("products")) + "]");
             request.put("group_config_id", "");
@@ -354,7 +354,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createPost("https://maicai.api.ddxq.mobi/order/checkOrder");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            Map<String, Object> request = UserConfig.getBody(headers);
+            Map<String, Object> request = UserConfig.getBody();
             request.put("address_id", addressId);
             request.put("user_ticket_id", "default");
             request.put("freight_ticket_id", "default");
@@ -439,7 +439,7 @@ public class Api {
             HttpRequest httpRequest = HttpUtil.createPost("https://maicai.api.ddxq.mobi/order/addNewOrder");
             Map<String, String> headers = UserConfig.getHeaders();
             httpRequest.addHeaders(headers);
-            Map<String, Object> request = UserConfig.getBody(headers);
+            Map<String, Object> request = UserConfig.getBody();
             request.put("showMsg", "false");
             request.put("showData", "true");
             request.put("ab_config", "{\"key_onion\":\"C\"}");

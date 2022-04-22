@@ -33,3 +33,5 @@ build/
 .vscode/
 user-config.txt
 .run/
+
+*.properties

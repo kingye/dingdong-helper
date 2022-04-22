@@ -3,7 +3,8 @@ import cn.hutool.core.util.RandomUtil;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
+import org.apache.commons.cli.*;
+import java.util.Optional;
 /**
  * 抢菜主程序 只能用于高峰期 并且运行两分钟以内 如未抢到不要再继续执行
  */
@@ -27,6 +28,25 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        Options opts = new Options();
+        Option optPolicy = new Option("p", "policy", true, "抢菜策略");
+        opts.addOption(optPolicy);
+        Option optThread = new Option("t", "threads", true, "线程数");
+        opts.addOption(optThread);
+        Option optConfig = new Option("c", "config", true, "抓包参数");
+        opts.addOption(optConfig);
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;//not a good practice, it serves it purpose 
+        try {
+            cmd = parser.parse(opts, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("utility-name", opts);
+            System.exit(1);
+        }
+       
+        
         //此为高峰期策略 通过同时获取或更新 购物车、配送、订单确认信息再进行高并发提交订单
         //一定要注意 并发量过高会导致被风控 请合理设置线程数、等待时间和执行时间 不要长时间的执行此程序（我配置的线程数和间隔 2分钟以内）
         //如果想等过高峰期后进行简陋 长时间执行 则将线程数改为1  间隔时间改为10秒以上 并发越小越像真人 不会被风控  要更真一点就用随机数（自己处理）
@@ -35,24 +55,37 @@ public class Application {
         //policy设置1 人工模式 运行程序则开始抢
         //policy设置2 时间触发 运行程序后等待早上5点59分30秒开始
         //policy设置3 时间触发 运行程序后等待早上8点29分30秒开始
-        int policy = 1;//默认人工模式
+        int policy =  Optional.ofNullable(cmd.getOptionValue("policy")).map((s) -> {
+            return Integer.parseInt(s);
+        }).orElse(1);//默认人工模式
 
         //最小订单成交金额 举例如果设置成50 那么订单要超过50才会下单
         double minOrderPrice = 0;
 
-        //基础信息执行线程数
-        int baseTheadSize = 2;
+
 
         //提交订单执行线程数
-        int submitOrderTheadSize = 6;
+        int submitOrderTheadSize =  Optional.ofNullable(cmd.getOptionValue("threads")).map((s) -> {
+            return Integer.parseInt(s);
+        }).orElse(1); //6;
+        //基础信息执行线程数
+        int baseTheadSize = submitOrderTheadSize == 1 ? 1 : 2; //2;
 
         //取随机数
         //请求间隔时间最小值
         int sleepMillisMin = 300;
         //请求间隔时间最大值
         int sleepMillisMax = 500;
-
-
+        try {
+            UserConfig.load(Optional.ofNullable(cmd.getOptionValue("config")).orElse("default.properties"));
+        } catch(Exception e) {
+            System.out.println(e);
+            System.exit(1);
+        }
+        if(policy == 0) {
+            ApplicationTest.test();
+            return;
+        }
         //5点59分30秒时间触发
         while (policy == 2 && !timeTrigger(5, 59, 30)) {
         }
